@@ -1,4 +1,4 @@
-// Version 1.11
+// Version 1.12
 //
 // Interface:
 //
@@ -91,6 +91,7 @@
 // 2013-11-22	New: setNodeStyle()
 // 2014-01-09	Fixed: Line bug if low node defined first and other have only left or right siblings.
 // 2014-01-09	Fixed: Image-not-found images wrong placed
+// 2015-11-20	Fixed: Overlapping nodes on using r-siblings only
 
 var	G_vmlCanvasManager;	// so non-IE won't freak out
 
@@ -995,7 +996,7 @@ positionTree = function(p)
 						if (us === uo){
 							debugOut("Common root = " + nodes[us].txt);
 							us = s;
-							while (nodes[us].parent != '' && ! nodeUnderParent(o, us)){
+							while (nodes[us].parent != '' && ! nodeUnderParent(o, nodes[us].parentix)){
 								us = nodes[us].parentix;
 							}
 							debugOut("Highest not common u-parent = " + nodes[us].txt);
@@ -1178,7 +1179,7 @@ reposParents = function()
 
 reposParentsRec = function(p)
 {
-	var w, s, f, h, hpos, r, maxw, minw, d;
+	var w, s, f, h, hpos, r, maxw, minw, d, q;
 
 	debugOut("reposParentsRec(" + nodes[p].txt + ")");
 	d = debug;
@@ -1240,6 +1241,15 @@ reposParentsRec = function(p)
 			debugOut(nodes[p].txt + " is a parent with 1 usib and not enough room to move, so move complete tree");
 			debugOut("Need: " + (nodes[nodes[p].usib[0]].hpos - nodes[p].hpos) + ", room to move: " + w + " (reset)");
 			w = nodes[nodes[p].usib[0]].hpos - nodes[p].hpos;
+		}
+		// Check for a crossing with a rsib connection line:
+		maxw = 999999;
+		for (q = 0; q < nodes.length; q++){
+			if (nodes[q].vpos === nodes[p].vpos && nodes[q].hpos > nodes[p].hpos){
+				maxw = nodes[q].hpos - nodes[p].hpos - boxWidth - hShift - hSpace;
+				if (maxw < 0) maxw = 0;
+				if (w > maxw) w = maxw;
+			}
 		}
 		if (w > 1){
 			// Shift this nodes and all 'l' and 'r' sib trees
