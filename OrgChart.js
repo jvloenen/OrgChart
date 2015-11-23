@@ -1,4 +1,4 @@
-// Version 1.12
+// Version 1.13
 //
 // Interface:
 //
@@ -92,6 +92,7 @@
 // 2014-01-09	Fixed: Line bug if low node defined first and other have only left or right siblings.
 // 2014-01-09	Fixed: Image-not-found images wrong placed
 // 2015-11-20	Fixed: Overlapping nodes on using r-siblings only
+// 2015-11-23	Fixed: Wrong positioning on some complex examples
 
 var	G_vmlCanvasManager;	// so non-IE won't freak out
 
@@ -690,8 +691,9 @@ checkLinesRec = function(p)
 						rp = nodes[rp].parentix;
 					}
 					if (rp !== p){
+						// Find the parent of s on the same vpos as p to decide what to shift:
 						rs = s;
-						while (nodes[rs].parent !== '' && nodes[rs].contype !== 'u'){
+						while (nodes[rs].parent !== '' && nodes[rs].vpos > nodes[p].vpos){
 							rs = nodes[rs].parentix;
 						}
 						rp = p;
